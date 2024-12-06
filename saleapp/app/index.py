@@ -1,10 +1,10 @@
 import math
 
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, jsonify, session
 import dao
 from app import app, login
 from flask_login import login_user, logout_user
-
+from app.models import UserRole
 
 @app.route("/")
 def index():
@@ -30,7 +30,16 @@ def login_process():
             return redirect('/')
 
     return render_template('login.html')
+@app.route("/login-admin", methods=['post'] )
+def login_admin():
+    if request.method.__eq__('POST'):
+        username = request.form.get('username')
+        password = request.form.get('password')
 
+        u = dao.auth_user(username=username, password=password, role=UserRole.ADMIN)
+        if u:
+            login_user(u)
+        return redirect('/admin')
 
 @app.route("/logout")
 def logout_process():
@@ -71,4 +80,5 @@ def get_user_by_id(user_id):
 
 
 if __name__ == '__main__':
+    from app import  admin
     app.run(debug=True)
